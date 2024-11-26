@@ -57,6 +57,7 @@ const App = () => {
   // todosを優先度でソート (優先度が低い値を上位に表示)
   const sortByPriority = () => {
     const sortedTodos = [...todos].sort((a, b) => a.priority - b.priority);
+    console.log("優先度でソートされたタスクリスト:", sortedTodos); // ソート結果を確認
     setTodos(sortedTodos);
   };
 
@@ -76,7 +77,7 @@ const App = () => {
   };
 
   const updateNewTodoPriority = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTodoPriority(Number(e.target.value));
+    setNewTodoPriority(Number(e.target.value)); // 文字列を数値に変換
   };
 
   const updateDeadline = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +98,6 @@ const App = () => {
   };
 
   const addNewTodo = () => {
-    // ▼▼ 編集
     const err = isValidTodoName(newTodoName);
     if (err !== "") {
       setNewTodoNameError(err);
@@ -107,11 +107,13 @@ const App = () => {
       id: uuid(),
       name: newTodoName,
       isDone: false,
-      priority: newTodoPriority,
+      priority: newTodoPriority, // 優先度が正しく設定されているか確認
       deadline: newTodoDeadline,
     };
+    console.log("新しいタスク:", newTodo); // タスクの中身を確認
     const updatedTodos = [...todos, newTodo];
     setTodos(updatedTodos);
+    console.log("追加後のタスクリスト:", updatedTodos); // 全タスクの状態を確認
     setNewTodoName("");
     setNewTodoPriority(3);
     setNewTodoDeadline(null);
