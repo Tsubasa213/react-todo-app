@@ -54,6 +54,22 @@ const App = () => {
     }
   };
 
+  // todosを優先度でソート (優先度が低い値を上位に表示)
+  const sortByPriority = () => {
+    const sortedTodos = [...todos].sort((a, b) => a.priority - b.priority);
+    setTodos(sortedTodos);
+  };
+
+  // todosを期限でソート (期限が近い順に表示)
+  const sortByDeadline = () => {
+    const sortedTodos = [...todos].sort((a, b) => {
+      if (!a.deadline) return 1; // aに期限がない場合、後ろに移動
+      if (!b.deadline) return -1; // bに期限がない場合、前に移動
+      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+    });
+    setTodos(sortedTodos);
+  };
+
   const updateNewTodoName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewTodoNameError(isValidTodoName(e.target.value)); // ◀◀ 追加
     setNewTodoName(e.target.value);
@@ -119,6 +135,22 @@ const App = () => {
           name="寝屋川タヌキ"
           uncompletedCount={uncompletedCount}
         />
+        <div className="mt-5 flex justify-start space-x-4">
+          <button
+            type="button"
+            onClick={sortByPriority}
+            className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
+          >
+            優先度でソート
+          </button>
+          <button
+            type="button"
+            onClick={sortByDeadline}
+            className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
+          >
+            期限でソート
+          </button>
+        </div>
       </div>
       <TodoList todos={todos} updateIsDone={updateIsDone} remove={remove} />
 
@@ -156,7 +188,7 @@ const App = () => {
 
         <div className="flex gap-5">
           <div className="font-bold">優先度</div>
-          {[1, 2, 3].map((value) => (
+          {[1, 2, 3, 4, 5].map((value) => (
             <label key={value} className="flex items-center space-x-1">
               <input
                 id={`priority-${value}`}
@@ -188,26 +220,28 @@ const App = () => {
           />
         </div>
 
-        <button
-          type="button"
-          onClick={addNewTodo}
-          className={twMerge(
-            "rounded-md bg-indigo-500 px-3 py-1 font-bold text-white hover:bg-indigo-600",
-            newTodoNameError && "cursor-not-allowed opacity-50"
-          )}
-        >
-          追加
-        </button>
+        <div className="flex flex-col space-y-4">
+          <button
+            type="button"
+            onClick={addNewTodo}
+            className={twMerge(
+              "rounded-md bg-indigo-500 px-3 py-1 font-bold text-white hover:bg-indigo-600",
+              newTodoNameError && "cursor-not-allowed opacity-50"
+            )}
+          >
+            追加
+          </button>
 
-        <button
-          type="button"
-          onClick={removeCompletedTodos}
-          className={
-            "mt-5 rounded-md bg-red-500 px-3 py-1 font-bold text-white hover:bg-red-600"
-          }
-        >
-          完了済みのタスクを削除
-        </button>
+          <button
+            type="button"
+            onClick={removeCompletedTodos}
+            className={
+              "rounded-md bg-red-500 px-3 py-1 font-bold text-white hover:bg-red-600"
+            }
+          >
+            完了済みのタスクを削除
+          </button>
+        </div>
       </div>
     </div>
   );
