@@ -16,10 +16,11 @@ const App = () => {
   const [newTodoPriority, setNewTodoPriority] = useState(3);
   const [newTodoDeadline, setNewTodoDeadline] = useState<Date | null>(null);
   const [newTodoNameError, setNewTodoNameError] = useState("");
-  const [userName, setUserName] = useState("寝屋川タヌキ"); // 追加: ユーザー名の状態管理
+  const [userName, setUserName] = useState("unknown");
 
   const [initialized, setInitialized] = useState(false);
   const localStorageKey = "TodoApp";
+  const userNameKey = "UserName"; // 追加: ユーザー名のキー
 
   useEffect(() => {
     const todoJsonStr = localStorage.getItem(localStorageKey);
@@ -33,6 +34,12 @@ const App = () => {
     } else {
       setTodos(initTodos);
     }
+
+    const storedUserName = localStorage.getItem(userNameKey); // 追加: ユーザー名の取得
+    if (storedUserName) {
+      setUserName(storedUserName);
+    }
+
     setInitialized(true);
   }, []);
 
@@ -41,6 +48,12 @@ const App = () => {
       localStorage.setItem(localStorageKey, JSON.stringify(todos));
     }
   }, [todos, initialized]);
+
+  useEffect(() => {
+    if (initialized) {
+      localStorage.setItem(userNameKey, userName); // 追加: ユーザー名の保存
+    }
+  }, [userName, initialized]);
 
   const uncompletedCount = todos.filter((todo: Todo) => !todo.isDone).length;
 
@@ -150,7 +163,6 @@ const App = () => {
     setShowTaskForm(true);
   };
 
-  // 追加: 削除ハンドラー
   const handleDelete = () => {
     if (taskToEdit) {
       remove(taskToEdit.id);
@@ -161,7 +173,29 @@ const App = () => {
   return (
     <div className="mx-4 mt-10 max-w-2xl md:mx-auto">
       <div className="cork-board">
-        <h1 className="mb-4 text-2xl font-bold">TodoApp</h1>
+        <div>
+          <div
+            className="mb-4 inline-block rounded-full bg-blue-900 p-2 text-3xl font-bold text-white shadow-md"
+            style={{
+              fontFamily: "'Kiwi Maru', serif", // Kiwi Maruを適用
+              fontSize: "24px",
+              boxSizing: "border-box", // ボーダーを含めたサイズ計算
+              padding: "8px 18px", // 内側の余白を調整
+              borderRadius: "50%", // 楕円形にする
+            }}
+          >
+            <div
+              style={{
+                border: "2px dashed white", // 白色の破線を追加
+                padding: "10px 20px", // 内側の余白を増やす
+                borderRadius: "50%", // 楕円形にする
+              }}
+            >
+              TodoApp
+            </div>
+          </div>
+        </div>
+
         <div className="mb-4">
           <WelcomeMessage
             name={userName}

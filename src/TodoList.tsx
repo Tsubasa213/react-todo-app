@@ -26,7 +26,11 @@ const TodoList = ({ todos, updateIsDone, remove, startEditing }: Props) => {
 
   if (todos.length === 0) {
     return (
-      <div className="text-white">現在、登録されているタスクはありません。</div>
+      <div className="rounded-lg bg-white p-4 shadow-md">
+        <div className="text-red-600">
+          すべてのタスクを達成しました🎉お疲れ様です！
+        </div>
+      </div>
     );
   }
 
