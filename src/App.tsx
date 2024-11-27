@@ -160,8 +160,8 @@ const App = () => {
 
   return (
     <div className="mx-4 mt-10 max-w-2xl md:mx-auto">
-      <h1 className="mb-4 text-2xl font-bold">TodoApp</h1>
       <div className="cork-board">
+        <h1 className="mb-4 text-2xl font-bold">TodoApp</h1>
         <div className="mb-4">
           <WelcomeMessage
             name={userName}
