@@ -1,28 +1,34 @@
 import React from "react";
 
-// 引数の型を定義
-// Propsという名前で定義することが一般的です。
 type Props = {
   name: string;
   uncompletedCount: number;
+  onNameChange: (name: string) => void;
 };
 
-// WelcomeMessage という関数コンポーネントの定義
-// 関数コンポーネントはパスカルケースで名前を設定します。
-const WelcomeMessage = (props: Props) => {
-  // いわゆる普通のロジックを記述する
+const WelcomeMessage = ({ name, uncompletedCount, onNameChange }: Props) => {
   const currentTime = new Date();
   const greeting =
     currentTime.getHours() < 12 ? "おはようございます" : "こんにちは";
 
-  //【重要!】JSX構文で描いた「JSX要素」を return で返す
   return (
-    <div className="text-blue-700">
-      {greeting}、{props.name}さん。 現在の未完了タスクは
-      {props.uncompletedCount}個です。
+    <div className="rounded-lg bg-white p-4 shadow-md">
+      <div className="mb-2 flex items-center text-blue-700">
+        <span>{greeting}、</span>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+          className="mx-2 rounded border border-gray-300 px-2 py-1 focus:border-blue-500 focus:outline-none"
+          placeholder="名前を入力"
+        />
+        <span>さん。</span>
+      </div>
+      <div className="text-blue-700">
+        現在の未完了タスクは{uncompletedCount}個です。
+      </div>
     </div>
   );
 };
 
-// 他のファイルで WelcomeMessage を import できるようにする
 export default WelcomeMessage;

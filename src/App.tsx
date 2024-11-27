@@ -16,6 +16,7 @@ const App = () => {
   const [newTodoPriority, setNewTodoPriority] = useState(3);
   const [newTodoDeadline, setNewTodoDeadline] = useState<Date | null>(null);
   const [newTodoNameError, setNewTodoNameError] = useState("");
+  const [userName, setUserName] = useState("寝屋川タヌキ"); // 追加: ユーザー名の状態管理
 
   const [initialized, setInitialized] = useState(false);
   const localStorageKey = "TodoApp";
@@ -98,7 +99,6 @@ const App = () => {
     }
 
     if (taskToEdit) {
-      // 編集モード: 既存のタスクを更新
       const updatedTodos = todos.map((todo) =>
         todo.id === taskToEdit.id
           ? {
@@ -111,7 +111,6 @@ const App = () => {
       );
       setTodos(updatedTodos);
     } else {
-      // 新規作成モード: 新しいタスクを追加
       const newTodo: Todo = {
         id: uuid(),
         name: newTodoName,
@@ -151,13 +150,22 @@ const App = () => {
     setShowTaskForm(true);
   };
 
+  // 追加: 削除ハンドラー
+  const handleDelete = () => {
+    if (taskToEdit) {
+      remove(taskToEdit.id);
+      resetForm();
+    }
+  };
+
   return (
     <div className="mx-4 mt-10 max-w-2xl md:mx-auto">
       <h1 className="mb-4 text-2xl font-bold">TodoApp</h1>
       <div className="mb-4">
         <WelcomeMessage
-          name="寝屋川タヌキ"
+          name={userName}
           uncompletedCount={uncompletedCount}
+          onNameChange={setUserName}
         />
         <div className="mt-5 flex justify-start space-x-4">
           <button
@@ -206,6 +214,7 @@ const App = () => {
           updateDeadline={updateDeadline}
           addOrUpdateTodo={addOrUpdateTodo}
           isEditing={!!taskToEdit}
+          onDelete={taskToEdit ? handleDelete : undefined}
         />
 
         <button

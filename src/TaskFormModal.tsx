@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTriangleExclamation,
   faXmark,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { twMerge } from "tailwind-merge";
 
@@ -17,8 +18,9 @@ type Props = {
   updateNewTodoName: (e: React.ChangeEvent<HTMLInputElement>) => void;
   updateNewTodoPriority: (e: React.ChangeEvent<HTMLInputElement>) => void;
   updateDeadline: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  addOrUpdateTodo: () => void; // 新しい名前に変更
-  isEditing: boolean; // 追加
+  addOrUpdateTodo: () => void;
+  isEditing: boolean;
+  onDelete?: () => void; // 削除機能のために追加
 };
 
 const TaskFormModal = ({
@@ -31,8 +33,9 @@ const TaskFormModal = ({
   updateNewTodoName,
   updateNewTodoPriority,
   updateDeadline,
-  addOrUpdateTodo, // 新しい関数名
-  isEditing, // 追加
+  addOrUpdateTodo,
+  isEditing,
+  onDelete,
 }: Props) => {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -150,26 +153,40 @@ const TaskFormModal = ({
             />
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-100"
-            >
-              キャンセル
-            </button>
-            <button
-              type="button"
-              onClick={addOrUpdateTodo}
-              className={twMerge(
-                "rounded-md bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-600",
-                newTodoNameError && "cursor-not-allowed opacity-50"
+          <div className="flex justify-between space-x-3 pt-4">
+            <div>
+              {isEditing && onDelete && (
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="flex items-center rounded-md bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-600"
+                >
+                  <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                  削除
+                </button>
               )}
-              disabled={!!newTodoNameError}
-              aria-disabled={!!newTodoNameError}
-            >
-              {isEditing ? "更新" : "追加"}
-            </button>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-100"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={addOrUpdateTodo}
+                className={twMerge(
+                  "rounded-md bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-600",
+                  newTodoNameError && "cursor-not-allowed opacity-50"
+                )}
+                disabled={!!newTodoNameError}
+                aria-disabled={!!newTodoNameError}
+              >
+                {isEditing ? "更新" : "追加"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
