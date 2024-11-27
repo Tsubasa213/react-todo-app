@@ -39,4 +39,10 @@
   padding: 20px; /* 内部の余白を設定 */
   border-radius: 5px; /* 角を丸める */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 軽い影を追加 */
+  border: solid 15px #bea46b;
+  filter: drop-shadow(5px 5px 5px #343030);
 }
+
+/* .shadow {
+  filter: drop-shadow(5px 5px 5px #aaa);
+} */
