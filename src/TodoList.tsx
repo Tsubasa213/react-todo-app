@@ -26,9 +26,7 @@ const TodoList = ({ todos, updateIsDone, remove, startEditing }: Props) => {
 
   if (todos.length === 0) {
     return (
-      <div className="text-red-500">
-        現在、登録されているタスクはありません。
-      </div>
+      <div className="text-white">現在、登録されているタスクはありません。</div>
     );
   }
 

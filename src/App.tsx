@@ -161,69 +161,71 @@ const App = () => {
   return (
     <div className="mx-4 mt-10 max-w-2xl md:mx-auto">
       <h1 className="mb-4 text-2xl font-bold">TodoApp</h1>
-      <div className="mb-4">
-        <WelcomeMessage
-          name={userName}
-          uncompletedCount={uncompletedCount}
-          onNameChange={setUserName}
+      <div className="cork-board">
+        <div className="mb-4">
+          <WelcomeMessage
+            name={userName}
+            uncompletedCount={uncompletedCount}
+            onNameChange={setUserName}
+          />
+          <div className="mt-5 flex justify-start space-x-4">
+            <button
+              type="button"
+              onClick={sortByPriority}
+              className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
+            >
+              <FontAwesomeIcon icon={faArrowDownWideShort} className="ml-1" />
+              優先度でソート
+            </button>
+            <button
+              type="button"
+              onClick={sortByDeadline}
+              className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
+            >
+              <FontAwesomeIcon icon={faArrowDownWideShort} className="ml-1" />
+              期限でソート
+            </button>
+          </div>
+        </div>
+        <TodoList
+          todos={todos}
+          updateIsDone={updateIsDone}
+          remove={remove}
+          startEditing={startEditing}
         />
-        <div className="mt-5 flex justify-start space-x-4">
+
+        <div className="mt-5">
           <button
             type="button"
-            onClick={sortByPriority}
-            className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
+            onClick={() => setShowTaskForm(true)}
+            className="w-full rounded-md bg-indigo-500 px-3 py-2 font-bold text-white hover:bg-indigo-600"
           >
-            <FontAwesomeIcon icon={faArrowDownWideShort} className="ml-1" />
-            優先度でソート
+            ＋ 新しいタスクを追加
           </button>
+
+          <TaskFormModal
+            isOpen={showTaskForm}
+            onClose={resetForm}
+            newTodoName={newTodoName}
+            newTodoNameError={newTodoNameError}
+            newTodoPriority={newTodoPriority}
+            newTodoDeadline={newTodoDeadline}
+            updateNewTodoName={updateNewTodoName}
+            updateNewTodoPriority={updateNewTodoPriority}
+            updateDeadline={updateDeadline}
+            addOrUpdateTodo={addOrUpdateTodo}
+            isEditing={!!taskToEdit}
+            onDelete={taskToEdit ? handleDelete : undefined}
+          />
+
           <button
             type="button"
-            onClick={sortByDeadline}
-            className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
+            onClick={removeCompletedTodos}
+            className="mt-4 w-full rounded-md bg-red-500 px-3 py-2 font-bold text-white hover:bg-red-600"
           >
-            <FontAwesomeIcon icon={faArrowDownWideShort} className="ml-1" />
-            期限でソート
+            完了済みのタスクを削除
           </button>
         </div>
-      </div>
-      <TodoList
-        todos={todos}
-        updateIsDone={updateIsDone}
-        remove={remove}
-        startEditing={startEditing}
-      />
-
-      <div className="mt-5">
-        <button
-          type="button"
-          onClick={() => setShowTaskForm(true)}
-          className="w-full rounded-md bg-indigo-500 px-3 py-2 font-bold text-white hover:bg-indigo-600"
-        >
-          ＋ 新しいタスクを追加
-        </button>
-
-        <TaskFormModal
-          isOpen={showTaskForm}
-          onClose={resetForm}
-          newTodoName={newTodoName}
-          newTodoNameError={newTodoNameError}
-          newTodoPriority={newTodoPriority}
-          newTodoDeadline={newTodoDeadline}
-          updateNewTodoName={updateNewTodoName}
-          updateNewTodoPriority={updateNewTodoPriority}
-          updateDeadline={updateDeadline}
-          addOrUpdateTodo={addOrUpdateTodo}
-          isEditing={!!taskToEdit}
-          onDelete={taskToEdit ? handleDelete : undefined}
-        />
-
-        <button
-          type="button"
-          onClick={removeCompletedTodos}
-          className="mt-4 w-full rounded-md bg-red-500 px-3 py-2 font-bold text-white hover:bg-red-600"
-        >
-          完了済みのタスクを削除
-        </button>
       </div>
     </div>
   );
