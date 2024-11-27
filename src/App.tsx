@@ -7,10 +7,15 @@ import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
 import { twMerge } from "tailwind-merge"; // ◀◀ 追加
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // ◀◀ 追加
-import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons"; // ◀◀ 追加
+import {
+  faTriangleExclamation,
+  faArrowDownWideShort,
+} from "@fortawesome/free-solid-svg-icons"; // faArrowDownWideShort を追加
+import TaskFormModal from "./TaskFormModal"; // 追加
 
 const App = () => {
   const [todos, setTodos] = useState<Todo[]>([]); // ◀◀ 編集
+  const [showTaskForm, setShowTaskForm] = useState(false);
   const [newTodoName, setNewTodoName] = useState("");
   const [newTodoPriority, setNewTodoPriority] = useState(3);
   const [newTodoDeadline, setNewTodoDeadline] = useState<Date | null>(null);
@@ -54,10 +59,9 @@ const App = () => {
     }
   };
 
-  // todosを優先度でソート (優先度が低い値を上位に表示)
   const sortByPriority = () => {
-    const sortedTodos = [...todos].sort((a, b) => a.priority - b.priority);
-    console.log("優先度でソートされたタスクリスト:", sortedTodos); // ソート結果を確認
+    const sortedTodos = [...todos].sort((a, b) => b.priority - a.priority);
+    console.log("優先度でソートされたタスクリスト:", sortedTodos);
     setTodos(sortedTodos);
   };
 
@@ -97,6 +101,7 @@ const App = () => {
     setTodos(updatedTodos);
   };
 
+  // addNewTodo 関数を修正
   const addNewTodo = () => {
     const err = isValidTodoName(newTodoName);
     if (err !== "") {
@@ -107,16 +112,14 @@ const App = () => {
       id: uuid(),
       name: newTodoName,
       isDone: false,
-      priority: newTodoPriority, // 優先度が正しく設定されているか確認
+      priority: newTodoPriority,
       deadline: newTodoDeadline,
     };
-    console.log("新しいタスク:", newTodo); // タスクの中身を確認
-    const updatedTodos = [...todos, newTodo];
-    setTodos(updatedTodos);
-    console.log("追加後のタスクリスト:", updatedTodos); // 全タスクの状態を確認
+    setTodos([...todos, newTodo]);
     setNewTodoName("");
     setNewTodoPriority(3);
     setNewTodoDeadline(null);
+    setShowTaskForm(false); // モーダルを閉じる
   };
 
   const removeCompletedTodos = () => {
@@ -143,6 +146,7 @@ const App = () => {
             onClick={sortByPriority}
             className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
           >
+            <FontAwesomeIcon icon={faArrowDownWideShort} className="ml-1" />
             優先度でソート
           </button>
           <button
@@ -150,100 +154,42 @@ const App = () => {
             onClick={sortByDeadline}
             className="rounded-md bg-blue-500 px-3 py-1 font-bold text-white hover:bg-blue-600"
           >
+            <FontAwesomeIcon icon={faArrowDownWideShort} className="ml-1" />
             期限でソート
           </button>
         </div>
       </div>
       <TodoList todos={todos} updateIsDone={updateIsDone} remove={remove} />
 
-      <div className="mt-5 space-y-2 rounded-md border p-3">
-        <h2 className="text-lg font-bold">新しいタスクの追加</h2>
-        {/* 編集: ここから... */}
-        <div>
-          <div className="flex items-center space-x-2">
-            <label className="font-bold" htmlFor="newTodoName">
-              名前
-            </label>
-            <input
-              id="newTodoName"
-              type="text"
-              value={newTodoName}
-              onChange={updateNewTodoName}
-              className={twMerge(
-                "grow rounded-md border p-2",
-                newTodoNameError && "border-red-500 outline-red-500"
-              )}
-              placeholder="2文字以上、32文字以内で入力してください"
-            />
-          </div>
-          {newTodoNameError && (
-            <div className="ml-10 flex items-center space-x-1 text-sm font-bold text-red-500 ">
-              <FontAwesomeIcon
-                icon={faTriangleExclamation}
-                className="mr-0.5"
-              />
-              <div>{newTodoNameError}</div>
-            </div>
-          )}
-        </div>
-        {/* ...ここまで */}
+      <div className="mt-5">
+        <button
+          type="button"
+          onClick={() => setShowTaskForm(true)}
+          className="w-full rounded-md bg-indigo-500 px-3 py-2 font-bold text-white hover:bg-indigo-600"
+        >
+          ＋ 新しいタスクを追加
+        </button>
 
-        <div className="flex gap-5">
-          <div className="font-bold">優先度</div>
-          {[1, 2, 3, 4, 5].map((value) => (
-            <label key={value} className="flex items-center space-x-1">
-              <input
-                id={`priority-${value}`}
-                name="priorityGroup"
-                type="radio"
-                value={value}
-                checked={newTodoPriority === value}
-                onChange={updateNewTodoPriority}
-              />
-              <span>{value}</span>
-            </label>
-          ))}
-        </div>
+        <TaskFormModal
+          isOpen={showTaskForm}
+          onClose={() => setShowTaskForm(false)}
+          newTodoName={newTodoName}
+          newTodoNameError={newTodoNameError}
+          newTodoPriority={newTodoPriority}
+          newTodoDeadline={newTodoDeadline}
+          updateNewTodoName={updateNewTodoName}
+          updateNewTodoPriority={updateNewTodoPriority}
+          updateDeadline={updateDeadline}
+          addNewTodo={addNewTodo}
+        />
 
-        <div className="flex items-center gap-x-2">
-          <label htmlFor="deadline" className="font-bold">
-            期限
-          </label>
-          <input
-            type="datetime-local"
-            id="deadline"
-            value={
-              newTodoDeadline
-                ? dayjs(newTodoDeadline).format("YYYY-MM-DDTHH:mm:ss")
-                : ""
-            }
-            onChange={updateDeadline}
-            className="rounded-md border border-gray-400 px-2 py-0.5"
-          />
-        </div>
-
-        <div className="flex flex-col space-y-4">
-          <button
-            type="button"
-            onClick={addNewTodo}
-            className={twMerge(
-              "rounded-md bg-indigo-500 px-3 py-1 font-bold text-white hover:bg-indigo-600",
-              newTodoNameError && "cursor-not-allowed opacity-50"
-            )}
-          >
-            追加
-          </button>
-
-          <button
-            type="button"
-            onClick={removeCompletedTodos}
-            className={
-              "rounded-md bg-red-500 px-3 py-1 font-bold text-white hover:bg-red-600"
-            }
-          >
-            完了済みのタスクを削除
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={removeCompletedTodos}
+          className="mt-4 w-full rounded-md bg-red-500 px-3 py-2 font-bold text-white hover:bg-red-600"
+        >
+          完了済みのタスクを削除
+        </button>
       </div>
     </div>
   );

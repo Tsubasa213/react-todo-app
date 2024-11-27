@@ -15,7 +15,7 @@ type Props = {
   remove: (id: string) => void; // ◀◀ 追加
 };
 
-const num2star = (n: number): string => "★".repeat(4 - n);
+const num2star = (n: number): string => "★".repeat(n);
 
 const TodoList = (props: Props) => {
   const todos = props.todos;
