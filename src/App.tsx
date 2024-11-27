@@ -4,27 +4,22 @@ import { initTodos } from "./initTodos";
 import WelcomeMessage from "./WelcomeMessage";
 import TodoList from "./TodoList";
 import { v4 as uuid } from "uuid";
-import dayjs from "dayjs";
-import { twMerge } from "tailwind-merge"; // ◀◀ 追加
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // ◀◀ 追加
-import {
-  faTriangleExclamation,
-  faArrowDownWideShort,
-} from "@fortawesome/free-solid-svg-icons"; // faArrowDownWideShort を追加
-import TaskFormModal from "./TaskFormModal"; // 追加
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
+import TaskFormModal from "./TaskFormModal";
 
 const App = () => {
-  const [todos, setTodos] = useState<Todo[]>([]); // ◀◀ 編集
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskToEdit, setEditingTodo] = useState<Todo | null>(null);
   const [newTodoName, setNewTodoName] = useState("");
   const [newTodoPriority, setNewTodoPriority] = useState(3);
   const [newTodoDeadline, setNewTodoDeadline] = useState<Date | null>(null);
   const [newTodoNameError, setNewTodoNameError] = useState("");
 
-  const [initialized, setInitialized] = useState(false); // ◀◀ 追加
-  const localStorageKey = "TodoApp"; // ◀◀ 追加
+  const [initialized, setInitialized] = useState(false);
+  const localStorageKey = "TodoApp";
 
-  // App コンポーネントの初回実行時のみLocalStorageからTodoデータを復元
   useEffect(() => {
     const todoJsonStr = localStorage.getItem(localStorageKey);
     if (todoJsonStr && todoJsonStr !== "[]") {
@@ -35,13 +30,11 @@ const App = () => {
       }));
       setTodos(convertedTodos);
     } else {
-      // LocalStorage にデータがない場合は initTodos をセットする
       setTodos(initTodos);
     }
     setInitialized(true);
   }, []);
 
-  // 状態 todos または initialized に変更があったときTodoデータを保存
   useEffect(() => {
     if (initialized) {
       localStorage.setItem(localStorageKey, JSON.stringify(todos));
@@ -50,7 +43,6 @@ const App = () => {
 
   const uncompletedCount = todos.filter((todo: Todo) => !todo.isDone).length;
 
-  // ▼▼ 追加
   const isValidTodoName = (name: string): string => {
     if (name.length < 2 || name.length > 32) {
       return "2文字以上、32文字以内で入力してください";
@@ -61,39 +53,36 @@ const App = () => {
 
   const sortByPriority = () => {
     const sortedTodos = [...todos].sort((a, b) => b.priority - a.priority);
-    console.log("優先度でソートされたタスクリスト:", sortedTodos);
     setTodos(sortedTodos);
   };
 
-  // todosを期限でソート (期限が近い順に表示)
   const sortByDeadline = () => {
     const sortedTodos = [...todos].sort((a, b) => {
-      if (!a.deadline) return 1; // aに期限がない場合、後ろに移動
-      if (!b.deadline) return -1; // bに期限がない場合、前に移動
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
       return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
     });
     setTodos(sortedTodos);
   };
 
   const updateNewTodoName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTodoNameError(isValidTodoName(e.target.value)); // ◀◀ 追加
+    setNewTodoNameError(isValidTodoName(e.target.value));
     setNewTodoName(e.target.value);
   };
 
   const updateNewTodoPriority = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTodoPriority(Number(e.target.value)); // 文字列を数値に変換
+    setNewTodoPriority(Number(e.target.value));
   };
 
   const updateDeadline = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dt = e.target.value; // UIで日時が未設定のときは空文字列 "" が dt に格納される
-    console.log(`UI操作で日時が "${dt}" (${typeof dt}型) に変更されました。`);
+    const dt = e.target.value;
     setNewTodoDeadline(dt === "" ? null : new Date(dt));
   };
 
   const updateIsDone = (id: string, value: boolean) => {
     const updatedTodos = todos.map((todo) => {
       if (todo.id === id) {
-        return { ...todo, isDone: value }; // スプレッド構文
+        return { ...todo, isDone: value };
       } else {
         return todo;
       }
@@ -101,25 +90,47 @@ const App = () => {
     setTodos(updatedTodos);
   };
 
-  // addNewTodo 関数を修正
-  const addNewTodo = () => {
+  const addOrUpdateTodo = () => {
     const err = isValidTodoName(newTodoName);
     if (err !== "") {
       setNewTodoNameError(err);
       return;
     }
-    const newTodo: Todo = {
-      id: uuid(),
-      name: newTodoName,
-      isDone: false,
-      priority: newTodoPriority,
-      deadline: newTodoDeadline,
-    };
-    setTodos([...todos, newTodo]);
+
+    if (taskToEdit) {
+      // 編集モード: 既存のタスクを更新
+      const updatedTodos = todos.map((todo) =>
+        todo.id === taskToEdit.id
+          ? {
+              ...todo,
+              name: newTodoName,
+              priority: newTodoPriority,
+              deadline: newTodoDeadline,
+            }
+          : todo
+      );
+      setTodos(updatedTodos);
+    } else {
+      // 新規作成モード: 新しいタスクを追加
+      const newTodo: Todo = {
+        id: uuid(),
+        name: newTodoName,
+        isDone: false,
+        priority: newTodoPriority,
+        deadline: newTodoDeadline,
+      };
+      setTodos([...todos, newTodo]);
+    }
+
+    resetForm();
+  };
+
+  const resetForm = () => {
     setNewTodoName("");
     setNewTodoPriority(3);
     setNewTodoDeadline(null);
-    setShowTaskForm(false); // モーダルを閉じる
+    setShowTaskForm(false);
+    setEditingTodo(null);
   };
 
   const removeCompletedTodos = () => {
@@ -130,6 +141,14 @@ const App = () => {
   const remove = (id: string) => {
     const updatedTodos = todos.filter((todo) => todo.id !== id);
     setTodos(updatedTodos);
+  };
+
+  const startEditing = (todo: Todo) => {
+    setEditingTodo(todo);
+    setNewTodoName(todo.name);
+    setNewTodoPriority(todo.priority);
+    setNewTodoDeadline(todo.deadline);
+    setShowTaskForm(true);
   };
 
   return (
@@ -159,7 +178,12 @@ const App = () => {
           </button>
         </div>
       </div>
-      <TodoList todos={todos} updateIsDone={updateIsDone} remove={remove} />
+      <TodoList
+        todos={todos}
+        updateIsDone={updateIsDone}
+        remove={remove}
+        startEditing={startEditing}
+      />
 
       <div className="mt-5">
         <button
@@ -172,7 +196,7 @@ const App = () => {
 
         <TaskFormModal
           isOpen={showTaskForm}
-          onClose={() => setShowTaskForm(false)}
+          onClose={resetForm}
           newTodoName={newTodoName}
           newTodoNameError={newTodoNameError}
           newTodoPriority={newTodoPriority}
@@ -180,7 +204,8 @@ const App = () => {
           updateNewTodoName={updateNewTodoName}
           updateNewTodoPriority={updateNewTodoPriority}
           updateDeadline={updateDeadline}
-          addNewTodo={addNewTodo}
+          addOrUpdateTodo={addOrUpdateTodo}
+          isEditing={!!taskToEdit}
         />
 
         <button

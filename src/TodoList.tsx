@@ -12,14 +12,13 @@ import { twMerge } from "tailwind-merge";
 type Props = {
   todos: Todo[];
   updateIsDone: (id: string, value: boolean) => void;
-  remove: (id: string) => void; // ◀◀ 追加
+  remove: (id: string) => void;
+  startEditing: (todo: Todo) => void; // 編集モード用プロパティ
 };
 
 const num2star = (n: number): string => "★".repeat(n);
 
-const TodoList = (props: Props) => {
-  const todos = props.todos;
-
+const TodoList = ({ todos, updateIsDone, remove, startEditing }: Props) => {
   if (todos.length === 0) {
     return (
       <div className="text-red-500">
@@ -33,8 +32,9 @@ const TodoList = (props: Props) => {
       {todos.map((todo) => (
         <div
           key={todo.id}
+          onClick={() => startEditing(todo)} // タスク全体をクリックで編集モードへ
           className={twMerge(
-            "rounded-md border border-slate-500 bg-white px-3 py-2 drop-shadow-md",
+            "cursor-pointer rounded-md border border-slate-500 bg-white px-3 py-2 drop-shadow-md transition hover:bg-gray-100",
             todo.isDone && "bg-blue-50 opacity-50"
           )}
         >
@@ -49,7 +49,8 @@ const TodoList = (props: Props) => {
             <input
               type="checkbox"
               checked={todo.isDone}
-              onChange={(e) => props.updateIsDone(todo.id, e.target.checked)}
+              onChange={(e) => updateIsDone(todo.id, e.target.checked)}
+              onClick={(e) => e.stopPropagation()} // チェックボックスクリック時のイベントを親要素に伝播させない
               className="mr-1.5 cursor-pointer"
             />
             <FontAwesomeIcon icon={faFile} flip="horizontal" className="mr-1" />

@@ -17,7 +17,8 @@ type Props = {
   updateNewTodoName: (e: React.ChangeEvent<HTMLInputElement>) => void;
   updateNewTodoPriority: (e: React.ChangeEvent<HTMLInputElement>) => void;
   updateDeadline: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  addNewTodo: () => void;
+  addOrUpdateTodo: () => void; // 新しい名前に変更
+  isEditing: boolean; // 追加
 };
 
 const TaskFormModal = ({
@@ -30,12 +31,13 @@ const TaskFormModal = ({
   updateNewTodoName,
   updateNewTodoPriority,
   updateDeadline,
-  addNewTodo,
+  addOrUpdateTodo, // 新しい関数名
+  isEditing, // 追加
 }: Props) => {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === "Enter" && !newTodoNameError && newTodoName.length >= 2) {
-        addNewTodo();
+        addOrUpdateTodo();
       }
       if (e.key === "Escape") {
         onClose();
@@ -49,25 +51,36 @@ const TaskFormModal = ({
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [isOpen, addNewTodo, onClose, newTodoNameError, newTodoName]);
+  }, [isOpen, addOrUpdateTodo, onClose, newTodoNameError, newTodoName]);
 
   if (!isOpen) return null;
 
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      onClick={handleBackgroundClick}
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          aria-label="モーダルを閉じる"
         >
           <FontAwesomeIcon icon={faXmark} className="size-5" />
         </button>
 
-        <h2 className="mb-4 text-lg font-bold">新しいタスクの追加</h2>
+        <h2 id="modal-title" className="mb-4 text-lg font-bold">
+          {isEditing ? "タスクの編集" : "新しいタスクの追加"}
+        </h2>
 
         <div className="space-y-4">
           <div>
@@ -86,10 +99,14 @@ const TaskFormModal = ({
                 )}
                 placeholder="2文字以上、32文字以内で入力してください"
                 autoFocus
+                aria-invalid={!!newTodoNameError}
               />
             </div>
             {newTodoNameError && (
-              <div className="ml-10 flex items-center space-x-1 text-sm font-bold text-red-500">
+              <div
+                className="ml-10 flex items-center space-x-1 text-sm font-bold text-red-500"
+                role="alert"
+              >
                 <FontAwesomeIcon
                   icon={faTriangleExclamation}
                   className="mr-0.5"
@@ -143,14 +160,15 @@ const TaskFormModal = ({
             </button>
             <button
               type="button"
-              onClick={addNewTodo}
+              onClick={addOrUpdateTodo}
               className={twMerge(
                 "rounded-md bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-600",
                 newTodoNameError && "cursor-not-allowed opacity-50"
               )}
               disabled={!!newTodoNameError}
+              aria-disabled={!!newTodoNameError}
             >
-              追加
+              {isEditing ? "更新" : "追加"}
             </button>
           </div>
         </div>
